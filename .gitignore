@@ -1,0 +1,30 @@
+# Binaries
+/texweave
+/cmd/texweave/texweave
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test
+*.test
+/coverage.out
+
+# Go workspace
+go.work
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Env (do not commit keys)
+.env
+.env.local
+*.env
+
+# OS
+.DS_Store
+Thumbs.db
