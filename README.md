@@ -36,6 +36,8 @@
 | [Demo](#-demo) | [Features](#-features) | [Quick start](#-quick-start) | [Usage](#-usage) | [Config](#-configuration) | [Author](#-author--contact) |
 |----------------|------------------------|------------------------------|------------------|---------------------------|----------------------------|
 
+**Package:** `go install github.com/ali-m07/texweave/cmd/texweave@latest` — no separate publish; the repo is the package. For versioned installs, see [Releases](https://github.com/ali-m07/texweave/releases) or [docs/PACKAGE.md](docs/PACKAGE.md).
+
 ---
 
 ## Demo
