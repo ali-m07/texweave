@@ -5,16 +5,19 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
+	"time"
 
-	"github.com/texweave/texweave/internal/domain"
+	"github.com/ali-m07/texweave/internal/domain"
 )
 
 const (
 	name         = "anthropic"
 	defaultModel = "claude-sonnet-4-20250514"
 	apiURL       = "https://api.anthropic.com/v1/messages"
+	httpTimeout  = 120 * time.Second
 )
 
 // Provider implements domain.Provider using Anthropic API.
@@ -36,7 +39,7 @@ func New(apiKey string, model string) (*Provider, error) {
 	return &Provider{
 		apiKey: apiKey,
 		model:  model,
-		client: http.DefaultClient,
+		client: &http.Client{Timeout: httpTimeout},
 	}, nil
 }
 
@@ -53,7 +56,10 @@ func (p *Provider) Generate(in domain.GenerateInput) (domain.GenerateResult, err
 			{"role": "user", "content": systemPrompt + "\n\n" + prompt},
 		},
 	}
-	raw, _ := json.Marshal(body)
+	raw, err := json.Marshal(body)
+	if err != nil {
+		return domain.GenerateResult{}, fmt.Errorf("anthropic: encode request: %w", err)
+	}
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, apiURL, bytes.NewReader(raw))
 	if err != nil {
 		return domain.GenerateResult{}, err
@@ -67,6 +73,10 @@ func (p *Provider) Generate(in domain.GenerateInput) (domain.GenerateResult, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		if len(body) > 0 {
+			return domain.GenerateResult{}, fmt.Errorf("anthropic: %s: %s", resp.Status, string(body))
+		}
 		return domain.GenerateResult{}, fmt.Errorf("anthropic: %s", resp.Status)
 	}
 	var out struct {

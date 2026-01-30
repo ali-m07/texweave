@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/texweave/texweave/cmd/texweave/root"
+	"github.com/ali-m07/texweave/cmd/texweave/root"
 )
 
 func main() {

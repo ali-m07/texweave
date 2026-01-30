@@ -1,4 +1,4 @@
-module github.com/texweave/texweave
+module github.com/ali-m07/texweave
 
 go 1.22
 

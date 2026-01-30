@@ -4,10 +4,13 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/sashabaranov/go-openai"
-	"github.com/texweave/texweave/internal/domain"
+	"github.com/ali-m07/texweave/internal/domain"
 )
+
+const requestTimeout = 120 * time.Second
 
 const name = "openai"
 
@@ -37,6 +40,8 @@ func (p *Provider) Name() string { return name }
 
 // Generate calls the API and returns LaTeX.
 func (p *Provider) Generate(in domain.GenerateInput) (domain.GenerateResult, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), requestTimeout)
+	defer cancel()
 	prompt := buildPrompt(in)
 	req := openai.ChatCompletionRequest{
 		Model: p.model,
@@ -46,7 +51,7 @@ func (p *Provider) Generate(in domain.GenerateInput) (domain.GenerateResult, err
 		},
 		Temperature: 0.2,
 	}
-	resp, err := p.client.CreateChatCompletion(context.Background(), req)
+	resp, err := p.client.CreateChatCompletion(ctx, req)
 	if err != nil {
 		return domain.GenerateResult{}, err
 	}
@@ -84,13 +89,21 @@ func buildPrompt(in domain.GenerateInput) string {
 
 func extractLatexBlock(s string) string {
 	s = strings.TrimSpace(s)
-	const begin = "\\begin{document}"
-	if i := strings.Index(s, begin); i >= 0 {
+	const docBegin = "\\begin{document}"
+	const docEnd = "\\end{document}"
+	const docClass = "\\documentclass"
+	if i := strings.Index(s, docBegin); i >= 0 {
 		s = s[i:]
+		if j := strings.Index(s, docEnd); j >= 0 {
+			return s[:j+len(docEnd)]
+		}
+		return s
 	}
-	const end = "\\end{document}"
-	if j := strings.Index(s, end); j >= 0 {
-		s = s[:j+len(end)]
+	if i := strings.Index(s, docClass); i >= 0 {
+		s = s[i:]
+		if j := strings.Index(s, docEnd); j >= 0 {
+			return s[:j+len(docEnd)]
+		}
 	}
 	return s
 }

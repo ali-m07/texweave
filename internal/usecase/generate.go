@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"github.com/texweave/texweave/internal/domain"
+	"github.com/ali-m07/texweave/internal/domain"
 )
 
 // Generator orchestrates LaTeX generation via a provider.

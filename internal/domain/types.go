@@ -11,5 +11,4 @@ type GenerateInput struct {
 // GenerateResult is the outcome of a generation request.
 type GenerateResult struct {
 	Latex string
-	Err   error
 }

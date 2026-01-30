@@ -6,11 +6,11 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/texweave/texweave/internal/config"
-	"github.com/texweave/texweave/internal/domain"
-	"github.com/texweave/texweave/internal/provider"
-	"github.com/texweave/texweave/internal/usecase"
-	fileadapter "github.com/texweave/texweave/internal/adapter/file"
+	"github.com/ali-m07/texweave/internal/config"
+	"github.com/ali-m07/texweave/internal/domain"
+	"github.com/ali-m07/texweave/internal/provider"
+	"github.com/ali-m07/texweave/internal/usecase"
+	fileadapter "github.com/ali-m07/texweave/internal/adapter/file"
 )
 
 var (
@@ -46,16 +46,21 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 	gen := usecase.NewGenerator(prov)
 
-	var content []byte
+	inputPath := flagInput
 	if len(args) > 0 {
-		content, err = fileadapter.ReadAll(args[0])
-	} else if flagInput != "" {
-		content, err = fileadapter.ReadAll(flagInput)
+		inputPath = args[0]
+	}
+	var content []byte
+	if inputPath != "" {
+		content, err = fileadapter.ReadAll(inputPath)
 	} else {
 		content, err = readStdin()
 	}
 	if err != nil {
 		return fmt.Errorf("read input: %w", err)
+	}
+	if len(content) == 0 {
+		return fmt.Errorf("input is empty")
 	}
 
 	in := domain.GenerateInput{
@@ -67,9 +72,6 @@ func run(cmd *cobra.Command, args []string) error {
 	res, err := gen.Generate(in)
 	if err != nil {
 		return fmt.Errorf("generate: %w", err)
-	}
-	if res.Err != nil {
-		return res.Err
 	}
 
 	if flagOutput != "" {

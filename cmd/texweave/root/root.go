@@ -2,7 +2,7 @@ package root
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/texweave/texweave/cmd/texweave/root/generate"
+	"github.com/ali-m07/texweave/cmd/texweave/root/generate"
 )
 
 // Execute runs the root command.

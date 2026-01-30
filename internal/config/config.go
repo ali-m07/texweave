@@ -1,8 +1,14 @@
 package config
 
 import (
+	"errors"
 	"os"
 	"strings"
+)
+
+var (
+	ErrMissingOpenAIKey    = errors.New("OPENAI_API_KEY is not set")
+	ErrMissingAnthropicKey = errors.New("ANTHROPIC_API_KEY is not set")
 )
 
 const (
@@ -30,7 +36,23 @@ func Load() *Config {
 
 func (c *Config) ProviderName() string {
 	if c.Provider != "" {
-		return strings.ToLower(c.Provider)
+		return strings.ToLower(strings.TrimSpace(c.Provider))
 	}
 	return DefaultProvider
+}
+
+// Validate returns an error if the selected provider has no API key set.
+func (c *Config) Validate() error {
+	name := c.ProviderName()
+	switch name {
+	case "openai":
+		if strings.TrimSpace(c.OpenAIKey) == "" {
+			return ErrMissingOpenAIKey
+		}
+	case "anthropic":
+		if strings.TrimSpace(c.AnthropicKey) == "" {
+			return ErrMissingAnthropicKey
+		}
+	}
+	return nil
 }
