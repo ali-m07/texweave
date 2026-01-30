@@ -1,0 +1,13 @@
+services:
+  texweave:
+    build: .
+    image: texweave:latest
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - TEXWEAVE_PROVIDER=${TEXWEAVE_PROVIDER:-openai}
+    volumes:
+      - ./data:/data
+    # Example: generate from /data/input.txt to /data/output.tex
+    command: generate -i /data/input.txt -o /data/output.tex
+    # Override for one-off: docker compose run --rm texweave generate -i /data/input.txt -o /data/output.tex

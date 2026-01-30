@@ -1,0 +1,11 @@
+# Example ConfigMap: input text for texweave. Use as volume in the Job.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: texweave-input
+data:
+  input.txt: |
+    # My Paper
+    Introduction here. Some math $x^2$.
+    - Item one
+    - Item two

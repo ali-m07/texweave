@@ -1,0 +1,11 @@
+.git
+.github
+docs
+*.md
+.gitignore
+.dockerignore
+Makefile
+scripts
+*_test.go
+.env
+.env.*

@@ -1,0 +1,38 @@
+# Job: run texweave once, read input from ConfigMap, write output to emptyDir.
+# Prereqs: create Secret (texweave-api-keys) and ConfigMap (texweave-input).
+# Apply: kubectl apply -f deploy/kubernetes/
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: texweave-generate
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: texweave
+          image: ghcr.io/ali-m07/texweave:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - texweave
+            - generate
+            - -i
+            - /input/input.txt
+            - -o
+            - /output/output.tex
+          envFrom:
+            - secretRef:
+                name: texweave-api-keys
+          volumeMounts:
+            - name: input
+              mountPath: /input
+            - name: output
+              mountPath: /output
+      volumes:
+        - name: input
+          configMap:
+            name: texweave-input
+        - name: output
+          emptyDir: {}

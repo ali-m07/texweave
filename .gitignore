@@ -25,6 +25,9 @@ go.work
 .env.local
 *.env
 
+# Kubernetes secret (copy from secret.example.yaml, do not commit)
+deploy/kubernetes/secret.yaml
+
 # OS
 .DS_Store
 Thumbs.db

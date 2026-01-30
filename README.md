@@ -33,10 +33,10 @@
 
 ## Table of contents
 
-| [Demo](#-demo) | [Features](#-features) | [Quick start](#-quick-start) | [Usage](#-usage) | [Config](#-configuration) | [Author](#-author--contact) |
-|----------------|------------------------|------------------------------|------------------|---------------------------|----------------------------|
+| [Demo](#-demo) | [Features](#-features) | [Quick start](#-quick-start) | [Docker](#-docker) | [Kubernetes](#-kubernetes) | [Usage](#-usage) | [Config](#-configuration) | [Author](#-author--contact) |
+|----------------|------------------------|------------------------------|-------------------|----------------------------|------------------|---------------------------|----------------------------|
 
-**Package:** `go install github.com/ali-m07/texweave/cmd/texweave@latest` — no separate publish; the repo is the package. For versioned installs, see [Releases](https://github.com/ali-m07/texweave/releases) or [docs/PACKAGE.md](docs/PACKAGE.md).
+**Package:** `go install github.com/ali-m07/texweave/cmd/texweave@latest` — no separate publish; the repo is the package. For versioned installs, see [Releases](https://github.com/ali-m07/texweave/releases) or [docs/package.md](docs/package.md).
 
 ---
 
@@ -175,6 +175,55 @@ pdflatex paper.tex
 
 ---
 
+## Docker
+
+**Build and run locally**
+
+```bash
+docker build -t texweave .
+echo "OPENAI_API_KEY=sk-..." > .env
+docker run --env-file .env -v $(pwd)/data:/data texweave generate -i /data/input.txt -o /data/output.tex
+```
+
+**Pre-built image** (after CI runs)
+
+```bash
+docker pull ghcr.io/ali-m07/texweave:latest
+docker run --env-file .env -v $(pwd)/data:/data ghcr.io/ali-m07/texweave:latest generate -i /data/input.txt -o /data/output.tex
+```
+
+**Docker Compose**
+
+```bash
+mkdir -p data && echo "# My doc\nContent here." > data/input.txt
+OPENAI_API_KEY=sk-... docker compose run --rm texweave
+# Output: data/output.tex
+```
+
+---
+
+## Kubernetes
+
+Example **Job**: input from ConfigMap, output to emptyDir (or copy out with `kubectl cp`).
+
+```bash
+# 1. Copy and edit secret (set your API key)
+cp deploy/kubernetes/secret.example.yaml deploy/kubernetes/secret.yaml
+# Edit secret.yaml, then:
+kubectl apply -f deploy/kubernetes/secret.yaml
+
+# 2. Apply ConfigMap (input text) and Job
+kubectl apply -f deploy/kubernetes/configmap-input.yaml -f deploy/kubernetes/job.yaml
+
+# 3. Wait and get output
+kubectl wait --for=condition=complete job/texweave-generate --timeout=120s
+kubectl cp $(kubectl get pods -l job-name=texweave-generate -o jsonpath='{.items[0].metadata.name}'):/output/output.tex output.tex
+```
+
+Image in the Job is `ghcr.io/ali-m07/texweave:latest`. After the first Docker workflow run, it will be available.
+
+---
+
 ## Usage
 
 **From file**
@@ -223,18 +272,16 @@ export TEXWEAVE_PROVIDER=anthropic   # default: openai
 
 ```text
 texweave/
+├── .github/workflows/      # CI: Go build/test, Docker build & push
 ├── cmd/texweave/           # CLI entry and commands
-│   ├── main.go
-│   └── root/
-├── internal/
-│   ├── domain/             # Types and Provider interface
-│   ├── usecase/            # Generate orchestration
-│   ├── provider/           # OpenAI + Anthropic
-│   ├── config/             # Env-based config
-│   └── adapter/file/       # File reading
-├── .github/workflows/      # CI (build + test)
-├── scripts/                # Maintainer scripts
-├── go.mod
+├── internal/                # Domain, usecase, provider, config, adapter
+├── deploy/
+│   └── kubernetes/         # Job, ConfigMap, Secret example
+├── docs/                   # package.md, push.md
+├── scripts/                 # publish.sh
+├── Dockerfile
+├── docker-compose.yml
+├── go.mod, go.sum
 ├── Makefile
 └── README.md
 ```
