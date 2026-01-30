@@ -1,13 +1,18 @@
 # Push to GitHub
 
-1. Create a new repository on GitHub (e.g. `texweave` under your account or org).
-2. From the project root, run:
+1. **Create the repo on GitHub**: [New repository](https://github.com/new) — name it `texweave`, leave it empty (no README/license).
+2. **Set module path and remote** (if you use a different GitHub username, replace `ali-mansouri`):
    ```bash
-   ./scripts/publish.sh YOUR_GITHUB_USERNAME
+   ./scripts/publish.sh ali-mansouri
    ```
-   This sets the Go module path and `origin` remote.
-3. Push:
+   Or manually:
+   ```bash
+   go mod edit -module github.com/YOUR_USERNAME/texweave
+   git remote add origin https://github.com/YOUR_USERNAME/texweave.git
+   # if origin already exists: git remote set-url origin https://github.com/YOUR_USERNAME/texweave.git
+   ```
+3. **Push**:
    ```bash
    git push -u origin main
    ```
-4. Update the install path in README if you use a different repo path (e.g. `github.com/YOUR_USERNAME/texweave`).
+4. **Optional**: If you used a different repo path, update the install command in README (e.g. `github.com/YOUR_USERNAME/texweave`).
